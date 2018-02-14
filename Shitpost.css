@@ -1,0 +1,45 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+.IFMM {
+    width: 50%;
+    margin: auto;
+    font-size: 600%;
+    text-align: center;
+    -webkit-transform:scale(2,1); /* Safari and Chrome */
+    -moz-transform:scale(2,1); /* Firefox */
+    -ms-transform:scale(2,1); /* IE 9 */
+    -o-transform:scale(2,1); /* Opera */
+    transform:scale(2,1); /* W3C */
+}
+
+h2 {
+    width: 50%;
+    margin: auto;
+    font-size: 250%;
+    text-align: center;
+    font-variant: small-caps;
+}
+
+.login {
+    width: 40%;
+    margin: auto;
+    border-style: dashed;
+}
+
+input[type=text], input[type=password]{
+    width: 20em;
+    padding: 4px;
+    border-radius: 2px;
+    border-style: none;
+}
+
+.submit {
+    padding: 12px 28px;
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: #004d4d;
+    border-style: none;
+}
