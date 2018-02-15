@@ -34,6 +34,7 @@ $logintable = "login_table";
 $shitdb = new db("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpasswd);
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
+    session_unset();
     $usrErr = $pwdErr = $shtErr = '';
     $usr = $pwd = $shitpost = '';
     include 'ShitpostLogin.php';

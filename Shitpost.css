@@ -1,3 +1,8 @@
+.flex-container {
+    display: flex;
+    flex-direction: row;
+}
+
 body {
     background-color: black;
     color: white;
@@ -24,9 +29,12 @@ h2 {
 }
 
 .login {
-    width: 40%;
+    width: 430px;
+    height: fit-content;
     margin: auto;
-    border-style: dashed;
+    padding: 10px;
+    border-style: solid;
+    border-width: 1px;
 }
 
 input[type=text], input[type=password]{
@@ -42,4 +50,38 @@ input[type=text], input[type=password]{
     border-radius: 4px;
     background-color: #004d4d;
     border-style: none;
+}
+
+.Entry {
+    margin: 5px;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 4px;
+    background-color: rgba(255,255,255,0.10);
+}
+
+.Time {
+    font-size: 66%;
+}
+
+.User {
+    font-size: 95%;
+}
+
+.Stamp {
+    padding: 3px;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 4px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    background-color: rgba(255,255,255,0.15);
+}
+
+.Shitpost {
+    padding: 10px 20px;
+    font-size: 110%;
+    border-radius: 4px;
+    border-top-left-radius: 0px;
+    background-color: rgba(255,255,255,0.3);
 }
