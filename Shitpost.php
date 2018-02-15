@@ -7,9 +7,12 @@
  */
 session_start();
 
-include 'class.db.php';
+require_once 'class.db.php';
+require_once 'class.viewer.php';
 
-include 'ShitpostHeader.php';
+$template_dir = './templates/';
+
+require_once $template_dir.'ShitpostHeader.phtml';
 
 function make_clickable($text) {
     $regex = '#(^|\s)https?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
@@ -33,16 +36,18 @@ $shittable = "shit_table";
 $logintable = "login_table";
 $shitdb = new db("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpasswd);
 
+
+
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     session_unset();
-    $usrErr = $pwdErr = $shtErr = '';
+    $loginErr = $shtErr = '';
     $usr = $pwd = $shitpost = '';
-    include 'ShitpostLogin.php';
+    require_once $template_dir.'ShitpostLogin.phtml';
 
 } else {
     if (!isset($_SESSION["usr"])) {
         if (empty($_POST["usr"])) {
-            $usrErr = "User name is required";
+            $loginErr = "User name is required";
         } else {
             // Check User database
             $checkUser = 'User = \'' . $_POST["usr"] . '\'';
@@ -50,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
             if (!empty($goodLogin)) {
                 $usr = $_POST["usr"];
             } else {
-                $usrErr = "User is not valid";
+                $loginErr = "Login is not valid";
             }
         }
     } else {
@@ -59,10 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 
     if (!isset($_SESSION["pwd"])) {
         if (empty($_POST["pwd"])) {
-            $pwdErr = "Password is required";
+            $loginErr .= ($loginErr != '') ? " and password is required" : "Password is required";
         } else {
             if ($_POST["pwd"] != $goodLogin["0"]["Password"]) {
-                $pwdErr = "Password is not valid";
+                $loginErr = "Login is not valid";
             } else {
                 $pwd = $_POST["pwd"];
             }
@@ -73,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     }
 
     if (($usr == '' || $pwd == '') && (!isset($_SESSION["usr"]))) {
-        include 'ShitpostLogin.php';
+        require_once $template_dir.'ShitpostLogin.phtml';
     } else {
         $_SESSION["usr"] = $usr;
         $_SESSION["pwd"] = $pwd;
@@ -87,23 +92,40 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         } elseif (isset($_POST["shitpost"]) && ($_POST["shitpost"] == '')) {
             $shtErr = "Empty shitposts not allowed!";
         }
-        include 'ShitpostDB.php';
+        require_once $template_dir.'ShitpostDB.phtml';
         // List db entries here
         $currentPostDate = '';
         foreach(array_reverse($shitdb->select($shittable)) as $shite) {
             $dateArray = explode(" ", $shite["Date"]);
             $shitDate = ($currentPostDate == $dateArray[0]) ? "" : $currentPostDate = $dateArray[0];
             $shitDate .= (date('Y-m-d') == $shitDate) ? " (Today)" : "";
-            $shitTime = "@" . $dateArray[1];
-            $shitUser = ($shite["User"] != $usr) ? $shite["User"] : "You";
-            $shitPost = str_replace("\n","<br>",$shite["Shit"]);
 
+            $shitTime = "@" . $dateArray[1];
+
+            $shitUser = ($shite["User"] != $usr) ? $shite["User"] : "You";
+
+            $shitPost = str_replace("\n","<br>",$shite["Shit"]);
             $shitPost = make_clickable($shitPost);
 
-            include 'ShitEntry.php';
+            $ShitEntryView = new viewer($template_dir);
+            $ShitEntryViewFile = 'ShitpostEntry.phtml';
+
+            $ShitEntryView->entryVars = array(
+                "shitDate"=>$shitDate,
+                "shitTime"=>$shitTime,
+                "shitUser"=>$shitUser,
+                "shitPost"=>$shitPost
+            );
+            //echo var_dump($ShitEntryView);
+            try {
+                $ShitEntryView->render($ShitEntryViewFile);
+            }
+            catch (Exception $E) {
+                echo $E -> getMessage();
+            }
         }
     }
 }
 
-include 'ShitpostFooter.php';
+require_once $template_dir.'ShitpostFooter.phtml';
 ?>
