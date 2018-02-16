@@ -12,8 +12,6 @@ require_once 'class.viewer.php';
 
 $template_dir = './templates/';
 
-require_once $template_dir.'ShitpostHeader.phtml';
-
 function make_clickable($text) {
     $regex = '#(^|\s)https?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
     return preg_replace_callback($regex, function ($matches) {
@@ -27,6 +25,21 @@ function make_clickable($text) {
     }, $text);
 }
 
+function view_render($view,$filename) {
+    try {
+        $view->render($filename);
+    }
+    catch (Exception $E) {
+        echo $E -> getMessage();
+    }
+}
+
+$ShitpostHeaderTemplate = 'ShitpostHeader.phtml';
+$ShitpostLoginTemplate = 'ShitpostLogin.phtml';
+$ShitpostNewEntryTemplate = 'ShitpostNewEntry.phtml';
+$ShitpostEntryTemplate = 'ShitpostEntry.phtml';
+$ShitpostFooterTemplate = 'ShitpostFooter.phtml';
+
 $dbhost = "localhost";
 $dbname = "shitdb";
 $dbuser = "root";
@@ -36,13 +49,16 @@ $shittable = "shit_table";
 $logintable = "login_table";
 $shitdb = new db("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpasswd);
 
+$ShitView = new viewer($template_dir);
 
+view_render($ShitView,$ShitpostHeaderTemplate);
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     session_unset();
     $loginErr = $shtErr = '';
     $usr = $pwd = $shitpost = '';
-    require_once $template_dir.'ShitpostLogin.phtml';
+
+    view_render($ShitView,$ShitpostLoginTemplate);
 
 } else {
     if (!isset($_SESSION["usr"])) {
@@ -78,10 +94,15 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     }
 
     if (($usr == '' || $pwd == '') && (!isset($_SESSION["usr"]))) {
-        require_once $template_dir.'ShitpostLogin.phtml';
+        $ShitView->loginVars = array(
+            "usr"=>$usr,
+            "loginErr"=>$loginErr
+        );
+        view_render($ShitView,$ShitpostLoginTemplate);
     } else {
         $_SESSION["usr"] = $usr;
         $_SESSION["pwd"] = $pwd;
+        // Process new shitpost to db if one exists
         if (isset($_POST["shitpost"]) && ($_POST["shitpost"] != '')) {
             // Insert shitpost into the DB under usr
             $shitdb->insert($shittable, array(
@@ -92,12 +113,15 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         } elseif (isset($_POST["shitpost"]) && ($_POST["shitpost"] == '')) {
             $shtErr = "Empty shitposts not allowed!";
         }
-        require_once $template_dir.'ShitpostNewEntry.phtml';
+
+        $ShitView->newEntryVars = array(
+            "usr"=>$usr,
+            "shtErr"=>$shtErr
+        );
+        view_render($ShitView,$ShitpostNewEntryTemplate);
+
         // List db entries here
         $currentPostDate = '';
-
-        $ShitEntryView = new viewer($template_dir);
-        $ShitEntryViewFile = 'ShitpostEntry.phtml';
         echo "<div class=\"flexbody\">";
         foreach(array_reverse($shitdb->select($shittable)) as $shite) {
             $dateArray = explode(" ", $shite["Date"]);
@@ -111,20 +135,13 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
             $shitPost = str_replace("\n","<br>",$shite["Shit"]);
             $shitPost = make_clickable($shitPost);
 
-
-            $ShitEntryView->entryVars = array(
+            $ShitView->entryVars = array(
                 "shitDate"=>$shitDate,
                 "shitTime"=>$shitTime,
                 "shitUser"=>$shitUser,
                 "shitPost"=>$shitPost
             );
-            //echo var_dump($ShitEntryView);
-            try {
-                $ShitEntryView->render($ShitEntryViewFile);
-            }
-            catch (Exception $E) {
-                echo $E -> getMessage();
-            }
+            view_render($ShitView,$ShitpostEntryTemplate);
         }
         echo '</div>';
     }
