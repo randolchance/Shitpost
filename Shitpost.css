@@ -4,6 +4,15 @@
 }
 
 body {
+    color: white;
+    background-color: black;
+}
+
+.flexbody {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: black;
     color: white;
 }
@@ -29,7 +38,7 @@ h2 {
 }
 
 .login {
-    width: 430px;
+    width: 305px;
     height: fit-content;
     margin: auto;
     padding: 10px;
@@ -53,6 +62,8 @@ input[type=text], input[type=password]{
 }
 
 .Entry {
+    display: flex;
+    flex-direction: row;
     margin: 5px;
     width: fit-content;
     height: fit-content;

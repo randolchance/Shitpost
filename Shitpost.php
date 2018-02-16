@@ -92,9 +92,13 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         } elseif (isset($_POST["shitpost"]) && ($_POST["shitpost"] == '')) {
             $shtErr = "Empty shitposts not allowed!";
         }
-        require_once $template_dir.'ShitpostDB.phtml';
+        require_once $template_dir.'ShitpostNewEntry.phtml';
         // List db entries here
         $currentPostDate = '';
+
+        $ShitEntryView = new viewer($template_dir);
+        $ShitEntryViewFile = 'ShitpostEntry.phtml';
+        echo "<div class=\"flexbody\">";
         foreach(array_reverse($shitdb->select($shittable)) as $shite) {
             $dateArray = explode(" ", $shite["Date"]);
             $shitDate = ($currentPostDate == $dateArray[0]) ? "" : $currentPostDate = $dateArray[0];
@@ -107,8 +111,6 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
             $shitPost = str_replace("\n","<br>",$shite["Shit"]);
             $shitPost = make_clickable($shitPost);
 
-            $ShitEntryView = new viewer($template_dir);
-            $ShitEntryViewFile = 'ShitpostEntry.phtml';
 
             $ShitEntryView->entryVars = array(
                 "shitDate"=>$shitDate,
@@ -124,6 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
                 echo $E -> getMessage();
             }
         }
+        echo '</div>';
     }
 }
 
