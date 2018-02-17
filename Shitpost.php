@@ -7,7 +7,7 @@
  */
 session_start();
 
-require_once 'class.db.php';
+require_once 'class.shitdb.php';
 require_once 'class.viewer.php';
 
 $template_dir = './templates/';
@@ -47,13 +47,16 @@ $dbpasswd = "abcdefgh";
 
 $shittable = "shit_table";
 $logintable = "login_table";
-$shitdb = new db("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpasswd);
+$shitdb = new shitdb("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpasswd);
 
 $ShitView = new viewer($template_dir);
 
+$postsPerPage = 25;
+$pageSpan = 3;
+
 view_render($ShitView,$ShitpostHeaderTemplate);
 
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
+if (($_SERVER["REQUEST_METHOD"] != "POST") && (!isset($_SESSION["usr"]))) {
     session_unset();
     $loginErr = $shtErr = '';
     $usr = $pwd = $shitpost = '';
@@ -120,32 +123,64 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
         );
         view_render($ShitView,$ShitpostNewEntryTemplate);
 
-        // List db entries here
+            // Count entries
+        $field = "COUNT(*)";
+        $selectUser = ""; // Option to filter results by user, or maybe even date at some point
+        $posts = (int) $shitdb->select(
+            $shittable,
+            (($selectUser != "") ? "User = \"{$selectUser}\"" : ""),
+            "",
+            $field
+        )[0][$field];
+
+            // Count total number of pages based on posts per page
+        $postPagesTotal = (int) ceil(($posts / $postsPerPage));
+            // Determine current page
+        $page = (($_GET["p"] != NULL) && ($_GET["p"] < $postPagesTotal)) ? $_GET["p"] : 0;
+
+            // Get results for this page
+        $resultArray = $shitdb->select(
+            $shittable,
+            "",
+            "",
+            "*",
+            array(
+                "start" => $page*$postsPerPage,
+                "number" => $postsPerPage
+            ),
+            true
+        );
+            // Process retrieved results and pass to view
+        $viewResultArray = array();
         $currentPostDate = '';
-        echo "<div class=\"flexbody\">";
-        foreach(array_reverse($shitdb->select($shittable)) as $shite) {
-            $dateArray = explode(" ", $shite["Date"]);
+        foreach($resultArray as $result) {
+            $dateArray = explode(" ", $result["Date"]);
             $shitDate = ($currentPostDate == $dateArray[0]) ? "" : $currentPostDate = $dateArray[0];
             $shitDate .= (date('Y-m-d') == $shitDate) ? " (Today)" : "";
 
             $shitTime = "@" . $dateArray[1];
 
-            $shitUser = ($shite["User"] != $usr) ? $shite["User"] : "You";
+            $shitUser = ($result["User"] != $usr) ? $result["User"] : "You";
 
-            $shitPost = str_replace("\n","<br>",$shite["Shit"]);
+            $shitPost = str_replace("\n","<br>",$result["Shit"]);
             $shitPost = make_clickable($shitPost);
 
-            $ShitView->entryVars = array(
-                "shitDate"=>$shitDate,
-                "shitTime"=>$shitTime,
-                "shitUser"=>$shitUser,
-                "shitPost"=>$shitPost
-            );
-            view_render($ShitView,$ShitpostEntryTemplate);
+            array_push($viewResultArray, array(
+                "shitDate" => $shitDate,
+                "shitTime" => $shitTime,
+                "shitUser" => $shitUser,
+                "shitPost" => $shitPost
+            ));
         }
-        echo '</div>';
+        $ShitView->entryVars = array(
+            "resultsArray" => $viewResultArray,
+            "totalPages" => $postPagesTotal,
+            "currentPage" => $page,
+            "pageSpan" => $pageSpan
+        );
+        view_render($ShitView,$ShitpostEntryTemplate);
     }
 }
 
-require_once $template_dir.'ShitpostFooter.phtml';
+view_render($ShitView,$ShitpostFooterTemplate);
 ?>

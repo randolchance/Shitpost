@@ -1,8 +1,42 @@
-<div class="Date"><?php echo $this->entryVars["shitDate"]?></div>
-<div class="Entry">
-    <div class="Stamp">
-        <div class="Time"><?php echo $this->entryVars["shitTime"]?></div>
-        <div class="User"><?php echo $this->entryVars["shitUser"]?></div>
+<?php function pageButtons($page, $pageSpan, $pageTotal) { ?>
+    <div class="pageNumbers">
+        <?php
+            $firstPage = (($page - $pageSpan) > 0) ? ($page - $pageSpan) : 0;
+            $finalPage = (($page + $pageSpan) < $pageTotal ) ? ($page + $pageSpan) : ($pageTotal-1);
+        ?>
+        <?php if($page > 0) { ?>
+            <a href="../Shitpost.php?p=0" class="pageButton">&lt&lt</a>
+            <a href="../Shitpost.php?p=<?php echo ($page-1)?>" class="pageButton">&lt</a>
+        <?php } ?>
+
+        <?php for($p = $firstPage; $p <= $finalPage; $p++) {
+            if ($p != $page) { ?>
+                <a href="../Shitpost.php?p=<?php echo $p?>" class="pageButton"><?php echo ($p+1)?></a>
+            <?php } else { ?>
+                <div class="pageCurrent"><?php echo ($p+1)?></div>
+            <?php } ?>
+        <?php } ?>
+
+        <?php if($page < $finalPage) { ?>
+            <a href="../Shitpost.php?p=<?php echo ($page+1)?>" class="pageButton">&gt</a>
+            <a href="../Shitpost.php?p=<?php echo $finalPage?>" class="pageButton">&gt&gt</a>
+        <?php } ?>
     </div>
-    <div class="Shitpost"><?php echo $this->entryVars["shitPost"]?></div>
+<?php } ?>
+
+<?php pageButtons($this->entryVars["currentPage"], $this->entryVars["pageSpan"], $this->entryVars["totalPages"]) ?>
+
+<div class="flexbody">
+    <?php foreach($this->entryVars["resultsArray"] as $entry) { ?>
+        <div class="Date"><?php echo $entry["shitDate"]?></div>
+        <div class="Entry">
+            <div class="Stamp">
+                <div class="Time"><?php echo $entry["shitTime"]?></div>
+                <div class="User"><?php echo $entry["shitUser"]?></div>
+            </div>
+            <div class="Shitpost"><?php echo $entry["shitPost"]?></div>
+        </div>
+    <?php } ?>
 </div>
+
+<?php pageButtons($this->entryVars["currentPage"], $this->entryVars["pageSpan"], $this->entryVars["totalPages"]) ?>
