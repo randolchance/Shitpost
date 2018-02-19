@@ -56,7 +56,7 @@ $pageSpan = 3;
 
 view_render($ShitView,$ShitpostHeaderTemplate);
 
-if (($_SERVER["REQUEST_METHOD"] != "POST") && (!isset($_SESSION["usr"]))) {
+if ((($_SERVER["REQUEST_METHOD"] != "POST") && (!isset($_SESSION["usr"]))) || (isset($_POST["logout"]))) {
     session_unset();
     $loginErr = $shtErr = '';
     $usr = $pwd = $shitpost = '';
@@ -178,6 +178,7 @@ if (($_SERVER["REQUEST_METHOD"] != "POST") && (!isset($_SESSION["usr"]))) {
             "currentPage" => $page,
             "pageSpan" => $pageSpan
         );
+        unset($resultArray, $viewResultArray);
         view_render($ShitView,$ShitpostEntryTemplate);
     }
 }

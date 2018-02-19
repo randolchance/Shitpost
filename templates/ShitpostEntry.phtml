@@ -3,28 +3,28 @@
         <?php
             $firstPage = (($page - $pageSpan) > 0) ? ($page - $pageSpan) : 0;
             $finalPage = (($page + $pageSpan) < $pageTotal ) ? ($page + $pageSpan) : ($pageTotal-1);
-        ?>
-        <?php if($page > 0) { ?>
+        if($page > 0) { ?>
             <a href="../Shitpost.php?p=0" class="pageButton">&lt&lt</a>
             <a href="../Shitpost.php?p=<?php echo ($page-1)?>" class="pageButton">&lt</a>
-        <?php } ?>
+        <?php }
 
-        <?php for($p = $firstPage; $p <= $finalPage; $p++) {
+        for($p = $firstPage; $p <= $finalPage; $p++) {
             if ($p != $page) { ?>
                 <a href="../Shitpost.php?p=<?php echo $p?>" class="pageButton"><?php echo ($p+1)?></a>
             <?php } else { ?>
                 <div class="pageCurrent"><?php echo ($p+1)?></div>
-            <?php } ?>
-        <?php } ?>
+            <?php }
+        }
 
-        <?php if($page < $finalPage) { ?>
+        if($page < $finalPage) { ?>
             <a href="../Shitpost.php?p=<?php echo ($page+1)?>" class="pageButton">&gt</a>
             <a href="../Shitpost.php?p=<?php echo $finalPage?>" class="pageButton">&gt&gt</a>
         <?php } ?>
     </div>
-<?php } ?>
+<?php }
 
-<?php pageButtons($this->entryVars["currentPage"], $this->entryVars["pageSpan"], $this->entryVars["totalPages"]) ?>
+
+pageButtons($this->entryVars["currentPage"], $this->entryVars["pageSpan"], $this->entryVars["totalPages"]) ?>
 
 <div class="flexbody">
     <?php foreach($this->entryVars["resultsArray"] as $entry) { ?>
